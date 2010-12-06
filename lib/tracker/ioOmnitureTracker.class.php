@@ -22,7 +22,6 @@ class ioOmnitureTracker
    * @var sfNamespacedParameterHolder
    */
   protected
-    $context                  = null,
     $parameterHolder          = null;
   
   /**
@@ -67,15 +66,13 @@ class ioOmnitureTracker
     $props                    = array(),
     $eVars                    = array();
   
-  public function __construct(sfContext $context, $options = array())
+  public function __construct($options = array())
   {
-    $this->initialize($context, $options);
+    $this->initialize($options);
   }
   
-  public function initialize(sfContext $context, $options)
+  public function initialize($options)
   {
-    $this->context = $context;
-    
     $this->parameterHolder = new sfNamespacedParameterHolder();
     
     $this->configure($options);
@@ -109,39 +106,6 @@ class ioOmnitureTracker
     }
     
     return $viewOptions;
-  }
-  
-  /**
-   * isTrackable
-   *
-   * Response is not trackable:
-   *  - for XHR requests
-   *  - if not HTML
-   *  - if 304
-   *  - if 301, 302 - if this is a redirect 
-   *  - if not rendering to the client
-   *  - if HTTP headers only
-   * @return bool
-   */
-  public function responseIsTrackable()
-  {
-    $request    = $this->context->getRequest();
-    $response   = $this->context->getResponse();
-    $controller = $this->context->getController();
-
-    if ($request->isXmlHttpRequest() ||
-        strpos($response->getContentType(), 'html') === false ||
-        $response->getStatusCode() == 304 ||
-        in_array($response->getStatusCode(), array(302, 301)) || 
-        $controller->getRenderMode() != sfView::RENDER_CLIENT ||
-        $response->isHeaderOnly())
-    {
-      return false;
-    }
-    else
-    {
-      return true;
-    }
   }
   
   /**
@@ -314,16 +278,6 @@ class ioOmnitureTracker
       $this->plant($caller['function'], array($value, $options));
       
       return false;
-    }
-    else
-    {
-      if (is_string($value) && isset($options['is_route']) && $options['is_route'])
-      {
-        $value = $this->context->getController()->genUrl($value);
-        unset($options['is_route']);
-      }
-      
-      return true;
     }
   }
   

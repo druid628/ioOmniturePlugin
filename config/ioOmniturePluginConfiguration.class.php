@@ -17,9 +17,9 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
   protected $_ioOmnitureTracker;
 
   /**
-   * @var sfContext
+   * @var sfUser
    */
-  protected $_context;
+  protected $_user;
 
   /**
    * We listen to a variety of events here
@@ -44,13 +44,24 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
    */
   public function getOmnitureTracker()
   {
+    if ($this->_ioOmnitureTracker === null)
+    {
+      $this->createOmnitureTracker();
+    }
+
     return $this->_ioOmnitureTracker;
   }
-  
-  public static function observe(sfEvent $event)
+
+  /**
+   * Generic observer for several *.method_not_found listeners.
+   *
+   * This effectively adds the getOmnitureTracker() and setOmnitureTracker()
+   * to several methods.
+   *
+   * @param sfEvent $event
+   */
+  public function observe(sfEvent $event)
   {
-    $subject = $event->getSubject();
-    
     switch ($event['method'])
     {
       case 'getOmnitureTracker':
@@ -64,40 +75,58 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
   }
   
   /**
-   * Automatic plugin modules and helper loading
+   * Binds the context to this
    *
    * @param  sfEvent  $event
    */
   public function listenToContextLoadFactories(sfEvent $event)
   {
-    $this->_context  = $event->getSubject();
-    
+    $this->_user  = $event->getSubject()->getUser();
+  }
+
+  /**
+   * Creates and returns a new instance of the omniture tracker.
+   *
+   * @return ioOmnitureTracker
+   */
+  protected function createOmnitureTracker()
+  {
+    if ($this->_user === null)
+    {
+      throw new sfException('The omniture tracker cannot be created until the user object is set.');
+    }
+
     // Create the tracker
     $class    = sfConfig::get('app_omniture_tracker_class', 'ioOmnitureTracker');
     $config   = sfConfig::get('app_omniture_params', array());
-    $tracker  = new $class($this->_context, $config);
-    
+    $tracker  = new $class($config);
+
     // pull callables from session storage
-    $callables = $this->_context->getUser()->getAttribute('callables', array(), 'io_omniture_plugin');
+    $callables = $this->_user->getAttribute('callables', array(), 'io_omniture_plugin');
     foreach ($callables as $callable)
     {
       list($method, $arguments) = $callable;
       call_user_func_array(array($tracker, $method), $arguments);
     }
+    $this->_user->setAttribute('callables', array(), 'io_omniture_plugin');
 
-    // Set the tracker to the request
-    $this->_context->getUser()->getAttributeHolder()->removeNamespace('io_omniture_plugin');
-    $this->_ioOmnitureTracker = $tracker;
+    return $tracker;
   }
-  
+
+  /**
+   * Listens to the response.filter_content and adds the tracking code.
+   *
+   * @param sfEvent $event
+   * @param  string $content
+   * @return string
+   */
   public function listenToResponseFilterContent(sfEvent $event, $content)
   {
     $response = $event->getSubject();
-
-    $tracker  = $this->_ioOmnitureTracker;
+    $tracker  = $this->getOmnitureTracker();
     
     // insert tracking code
-    if ($tracker->responseIsTrackable() && $tracker->isEnabled())
+    if ($this->responseIsTrackable() && $tracker->isEnabled())
     {
       if (sfConfig::get('sf_logging_enabled'))
       {
@@ -114,5 +143,34 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
     }
 
     return $content;
+  }
+
+  /**
+   * Returns whether or not the current response is basically "trackable".
+   *
+   * @return bool
+   */
+  public function responseIsTrackable()
+  {
+    if (!$this->_context)
+    {
+      throw new sfException('ioOmniturePluginConfiguration::responseIsTrackable() cannot be called this early.');
+    }
+
+    $request    = $this->_context->getRequest();
+    $response   = $this->_context->getResponse();
+    $controller = $this->_context->getController();
+
+    if ($request->isXmlHttpRequest() ||
+        strpos($response->getContentType(), 'html') === false ||
+        $response->getStatusCode() == 304 ||
+        in_array($response->getStatusCode(), array(302, 301)) ||
+        $controller->getRenderMode() != sfView::RENDER_CLIENT ||
+        $response->isHeaderOnly())
+    {
+      return false;
+    }
+
+    return true;
   }
 }
