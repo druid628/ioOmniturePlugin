@@ -1,0 +1,13 @@
+all:
+  io_omniture_plugin:
+    tracker_class:      ioOmnitureTracker
+    params:
+      enabled:              off
+      insertion:            bottom
+      account:              YOURACCOUNT
+      page_name:            ~
+      domain_name:          ~
+      detect_flash_policy:  ~
+      include_javascript:   true
+    
+
