@@ -17,9 +17,9 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
   protected $_ioOmnitureTracker;
 
   /**
-   * @var sfUser
+   * @var sfContext
    */
-  protected $_user;
+  protected $_context;
 
   /**
    * We listen to a variety of events here
@@ -46,7 +46,7 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
   {
     if ($this->_ioOmnitureTracker === null)
     {
-      $this->createOmnitureTracker();
+      throw new sfException('Omniture tracker is not yet available');
     }
 
     return $this->_ioOmnitureTracker;
@@ -81,7 +81,8 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
    */
   public function listenToContextLoadFactories(sfEvent $event)
   {
-    $this->_user  = $event->getSubject()->getUser();
+    $this->_context = $event->getSubject();
+    $this->_ioOmnitureTracker = $this->createOmnitureTracker($this->_context->getUser());
   }
 
   /**
@@ -89,26 +90,21 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
    *
    * @return ioOmnitureTracker
    */
-  protected function createOmnitureTracker()
+  protected function createOmnitureTracker(sfUser $user)
   {
-    if ($this->_user === null)
-    {
-      throw new sfException('The omniture tracker cannot be created until the user object is set.');
-    }
-
     // Create the tracker
     $class    = sfConfig::get('app_omniture_tracker_class', 'ioOmnitureTracker');
     $config   = sfConfig::get('app_omniture_params', array());
     $tracker  = new $class($config);
 
     // pull callables from session storage
-    $callables = $this->_user->getAttribute('callables', array(), 'io_omniture_plugin');
+    $callables = $user->getAttribute('callables', array(), 'io_omniture_plugin');
     foreach ($callables as $callable)
     {
       list($method, $arguments) = $callable;
       call_user_func_array(array($tracker, $method), $arguments);
     }
-    $this->_user->setAttribute('callables', array(), 'io_omniture_plugin');
+    $user->setAttribute('callables', array(), 'io_omniture_plugin');
 
     return $tracker;
   }
