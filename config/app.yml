@@ -1,8 +1,8 @@
 all:
   io_omniture_plugin:
-    tracker_class:      ioOmnitureTracker
+    tracker_class:          ioOmnitureTracker
     params:
-      enabled:              off
+      enabled:              false
       insertion:            bottom
       account:              YOURACCOUNT
       page_name:            ~
