@@ -18,10 +18,11 @@ class ioOmnitureTracker
     POSITION_BOTTOM           = 'bottom';
   
   /**
-   * @var sfContext
+   * @var sfUser
    * @var sfNamespacedParameterHolder
    */
   protected
+    $user                     = null,
     $parameterHolder          = null;
   
   /**
@@ -66,15 +67,11 @@ class ioOmnitureTracker
     $props                    = array(),
     $eVars                    = array();
   
-  public function __construct($options = array())
+  public function __construct(sfUser $user, $options = array())
   {
-    $this->initialize($options);
-  }
-  
-  public function initialize($options)
-  {
+    $this->user = $user;
     $this->parameterHolder = new sfNamespacedParameterHolder();
-    
+
     $this->configure($options);
   }
   
@@ -84,7 +81,6 @@ class ioOmnitureTracker
    * View options include:
    * 
    *  * track_as
-   *  * is_route
    *  * is_event
    *  * use_linker
    * 
@@ -96,7 +92,7 @@ class ioOmnitureTracker
   {
     $viewOptions = array();
     
-    foreach (array('track_as', 'is_route', 'is_event', 'use_linker') as $option)
+    foreach (array('track_as', 'is_event', 'use_linker') as $option)
     {
       if (isset($options[$option]))
       {
@@ -142,7 +138,7 @@ class ioOmnitureTracker
     {
       $html[] = 's.pageType="errorPage";';
     }
-    
+
     if ($this->getPageName())
     {
       $html[] = sprintf('s.pageName="%s"', $this->getPageName());
@@ -279,6 +275,8 @@ class ioOmnitureTracker
       
       return false;
     }
+
+    return true;
   }
   
   /**
@@ -289,7 +287,7 @@ class ioOmnitureTracker
    */
   protected function plant($method, $arguments = array())
   {
-    $user = $this->getContext()->getUser();
+    $user = $this->getUser();
     
     $callables = $user->getAttributeHolder()->get('callables', array(), 'io_omniture_plugin');
     $callables[] = array($method, $arguments);
@@ -362,11 +360,11 @@ class ioOmnitureTracker
   }
   
   /**
-   * @return sfContext
+   * @return sfUser
    */
-  public function getContext()
+  public function getUser()
   {
-    return $this->context;
+    return $this->user;
   }
   
   /**

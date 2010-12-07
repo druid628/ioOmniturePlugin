@@ -93,9 +93,9 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
   protected function createOmnitureTracker(sfUser $user)
   {
     // Create the tracker
-    $class    = sfConfig::get('app_omniture_tracker_class', 'ioOmnitureTracker');
-    $config   = sfConfig::get('app_omniture_params', array());
-    $tracker  = new $class($config);
+    $class    = sfConfig::get('app_io_omniture_plugin_tracker_class', 'ioOmnitureTracker');
+    $config   = sfConfig::get('app_io_omniture_plugin_params', array());
+    $tracker  = new $class($user, $config);
 
     // pull callables from session storage
     $callables = $user->getAttribute('callables', array(), 'io_omniture_plugin');
@@ -120,9 +120,9 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
   {
     $response = $event->getSubject();
     $tracker  = $this->getOmnitureTracker();
-    
+
     // insert tracking code
-    if ($this->responseIsTrackable() && $tracker->isEnabled())
+    if ($this->responseIsTrackable() && (true || $tracker->isEnabled()))
     {
       if (sfConfig::get('sf_logging_enabled'))
       {
