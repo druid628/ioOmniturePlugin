@@ -19,11 +19,9 @@ class ioOmnitureTracker
   
   /**
    * @var sfUser
-   * @var sfNamespacedParameterHolder
    */
   protected
     $user                     = null,
-    $parameterHolder          = null;
   
   /**
    * A list of different parameters for the tracker
@@ -70,7 +68,6 @@ class ioOmnitureTracker
   public function __construct(sfUser $user, $options = array())
   {
     $this->user = $user;
-    $this->parameterHolder = new sfNamespacedParameterHolder();
 
     $this->configure($options);
   }
@@ -365,36 +362,7 @@ class ioOmnitureTracker
   {
     return $this->user;
   }
-  
-  /**
-   * @return sfNamespacedParameterHolder
-   */
-  public function getParameterHolder()
-  {
-    return $this->parameterHolder;
-  }
-  
-  /**
-   * @return string
-   */
-  public function getParameter($name, $default = null, $ns = null)
-  {
-    return $this->parameterHolder->get($name, $default, $ns);
-  }
-  
-  /**
-   * @return boolean
-   */
-  public function hasParameter($name, $ns = null)
-  {
-    return $this->parameterHolder->has($name, $ns);
-  }
-  
-  public function setParameter($name, $value, $ns = null)
-  {
-    return $this->parameterHolder->set($name, $value, $ns);
-  }
-  
+
   /**
    * Toggle tracker's enabled state.
    * 
