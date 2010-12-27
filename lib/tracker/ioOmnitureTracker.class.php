@@ -18,37 +18,34 @@ class ioOmnitureTracker
     POSITION_BOTTOM           = 'bottom';
   
   /**
+   * @var string The account name
    * @var sfUser
    */
   protected
+    $account                  = null,
     $user                     = null;
   
   /**
-   * A list of different parameters for the tracker
+   * The options array
+   *
+   * @var array
    */
+  protected $options = array(
+    'enabled'           => false,                   // whether the tracker is enabled or not
+    'insertion'         => self::POSITION_BOTTOM,   // where to insert the code
+    'includeJavascript' => true,                    // whether to include the actual s_code.js file
+  );
   
+
   /**
-   * @var boolean Whether the tracker is enabled or not
-   * @var string  The account name to use with the account
-   * @var string  "top" or "bottom" - where to insert the code
-   */
-  protected  
-    $enabled                  = false,
-    $account                  = null,
-    $insertion                = null,
-    $includeJavascript        = null;
-  
-  /**
-   * @var string  The name of the page, if other than the url
-   * @var string  The referrer if you need to set it manually
-   * @var string  The transactionID
+   * Various common omniture information
    */
   protected
-    $pageName                 = null,
-    $referrer                 = null,
-    $transactionId            = null,
-    $zip                      = null,
-    $state                    = null;
+    $pageName                 = null, // The name of the page, if other than the url
+    $referrer                 = null, // The referrer if you need to set it manually
+    $transactionId            = null, // The transactionID
+    $zip                      = null, // The zip code of the current user
+    $state                    = null; // The state of the current user
   
   /**
    * @var array   An array of event numbers that should be output via the
@@ -56,7 +53,7 @@ class ioOmnitureTracker
    *              number is the key and a true/false boolean is the value
    * @var array   An array of s.prop# variables that should be set. This
    *              array takes the form array(5 => 'search term'), which
-   *              sets s.prop5="seach term"
+   *              sets s.prop5="search term"
    * @var array   An array of s.eVar$ variables that should be set. This
    *              is an array like the props array
    */
@@ -64,38 +61,18 @@ class ioOmnitureTracker
     $events                   = array(),
     $props                    = array(),
     $eVars                    = array();
-  
+
+  /**
+   * @param  string $account The account name
+   * @param array $options Options for the tracker
+   */
   public function __construct($account, $options = array())
   {
     $this->account = $account;
-    $this->configure($options);
-  }
 
-  /**
-   * Apply non-null configuration values.
-   *
-   * @param   array $params
-   */
-  public function configure($params)
-  {
-    if (isset($params['enabled']))
+    foreach ($options as $key => $val)
     {
-      $this->setEnabled($params['enabled']);
-    }
-
-    if (isset($params['page_name']))
-    {
-      $this->setPageName($params['page_name']);
-    }
-
-    if (isset($params['insertion']))
-    {
-      $this->setInsertion($params['insertion']);
-    }
-
-    if (isset($params['include_javascript']))
-    {
-      $this->setIncludeJavascript($params['include_javascript']);
+      $this->setOption($key, $val);
     }
   }
 
@@ -554,5 +531,27 @@ class ioOmnitureTracker
   public function getState()
   {
     return $this->state;
+  }
+
+  /**
+   * Sets an option value
+   *
+   * @param  string $name The name of the option
+   * @param  mixed $value The value to set the option to
+   * @return void
+   */
+  public function setOption($name, $value)
+  {
+    $this->options[$name] = $value;
+  }
+
+  /**
+   * @param  string $name The name of the option to retrieve
+   * @param mixed $default The value to retrieve if the option does not exist
+   * @return mixed
+   */
+  public function getOption($name, $default = null)
+  {
+    return isset($this->options[$name]) ? $this->options[$name] : $default;
   }
 }
