@@ -255,20 +255,15 @@ class ioOmnitureTracker
   }
   
   /**
-   * Apply common options to a value.
+   * Saves the value to the session if use_flash is specified in the options array.
    * 
    * @param   mixed $value
-   * @param   mixed $options
+   * @param   array $options
    * 
    * @return  bool  whether to continue execution
    */
   protected function prepare(& $value, & $options = array())
   {
-    if (is_string($options))
-    {
-      $options = sfToolkit::stringToArray($options);
-    }
-    
     if (isset($options['use_flash']) && $options['use_flash'])
     {
       unset($options['use_flash']);
@@ -286,13 +281,20 @@ class ioOmnitureTracker
   
   /**
    * Plant a callable to be executed against the next request's tracker.
+   *
+   * This basically stores a callable on the session that will be called
+   * on the tracker on the next request. This is how you can "save" a portion
+   * of tracking information to be applied on the next request.
    * 
    * @param   string $method
    * @param   array $arguments
    */
   protected function plant($method, $arguments = array())
   {
-    $user = $this->getUser();
+    if (!$user = $this->getUser())
+    {
+      throw new LogicException('Cannot plant values without an injected user.');
+    }
     
     $callables = $user->getAttributeHolder()->get('callables', array(), 'io_omniture_plugin');
     $callables[] = array($method, $arguments);
@@ -508,7 +510,7 @@ class ioOmnitureTracker
   }
   
   /**
-   * Getter for the referrer, if it's been set
+   * Getter for the referrer, if it has been set
    */
   public function getReferrer()
   {
