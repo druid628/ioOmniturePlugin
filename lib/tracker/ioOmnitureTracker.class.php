@@ -75,17 +75,6 @@ class ioOmnitureTracker
       $this->setOption($key, $val);
     }
   }
-
-  /**
-   * Optionally set the user, which allows messages to be "planted" across
-   * requests.
-   *
-   * @param sfUser $user
-   */
-  public function setUser(sfUser $user)
-  {
-    $this->user = $user;
-  }
   
   /**
    * Insert tracking code into a response.
@@ -232,59 +221,22 @@ class ioOmnitureTracker
   }
   
   /**
-   * Saves the value to the session if use_flash is specified in the options array.
-   * 
-   * @param   mixed $value
-   * @param   array $options
-   * 
-   * @return  bool  whether to continue execution
-   */
-  protected function prepare(& $value, & $options = array())
-  {
-    if (isset($options['use_flash']) && $options['use_flash'])
-    {
-      unset($options['use_flash']);
-      
-      $trace = debug_backtrace();
-      
-      $caller = $trace[1];
-      $this->plant($caller['function'], array($value, $options));
-      
-      return false;
-    }
-
-    return true;
-  }
-  
-  /**
-   * Plant a callable to be executed against the next request's tracker.
-   *
-   * This basically stores a callable on the session that will be called
-   * on the tracker on the next request. This is how you can "save" a portion
-   * of tracking information to be applied on the next request.
-   * 
-   * @param   string $method
-   * @param   array $arguments
-   */
-  protected function plant($method, $arguments = array())
-  {
-    if (!$user = $this->getUser())
-    {
-      throw new LogicException('Cannot plant values without an injected user.');
-    }
-    
-    $callables = $user->getAttributeHolder()->get('callables', array(), 'io_omniture_plugin');
-    $callables[] = array($method, $arguments);
-    
-    $user->getAttributeHolder()->set('callables', $callables, 'io_omniture_plugin');
-  }
-  
-  /**
    * @return sfUser
    */
   public function getUser()
   {
     return $this->user;
+  }
+
+  /**
+   * Optionally set the user, which allows messages to be "planted" across
+   * requests.
+   *
+   * @param sfUser $user
+   */
+  public function setUser(sfUser $user)
+  {
+    $this->user = $user;
   }
 
   /**
@@ -376,27 +328,6 @@ class ioOmnitureTracker
   }
   
   /**
-   * Used internally to fit in with the single value interface that
-   * allows us to use the prepare() function
-   * 
-   * @see setProp
-   */
-  public function setPropInternal($value, $options = array())
-  {
-    if (!isset($options['num']))
-    {
-      throw new sfException('A "num" number option must be passed');
-    }
-    
-    if ($this->prepare($value, $options))
-    {
-      $num = $options['num'];
-      
-      $this->props[$num] = $value;
-    }
-  }
-  
-  /**
    * Sets a particular s.eVar# value
    * 
    * @param integer The prop number to set (e.g. 5 for s.eVar5)
@@ -407,27 +338,6 @@ class ioOmnitureTracker
     $options = array_merge(array('num' => $num), $options);
     
     $this->seteVarInternal($value, $options);
-  }
-  
-  /**
-   * Used internally to fit in with the single value interface that
-   * allows us to use the prepare() function
-   * 
-   * @see 
-   */
-  public function seteVarInternal($value, $options = array())
-  {
-    if (!isset($options['num']))
-    {
-      throw new sfException('An "num" number option must be passed');
-    }
-    
-    if ($this->prepare($value, $options))
-    {
-      $num = $options['num'];
-      
-      $this->eVars[$num] = $value;
-    }
   }
   
   /**
@@ -509,5 +419,95 @@ class ioOmnitureTracker
   public function getOption($name, $default = null)
   {
     return isset($this->options[$name]) ? $this->options[$name] : $default;
+  }
+
+  /**
+   * Used internally to fit in with the single value interface that
+   * allows us to use the prepare() function
+   *
+   * @see setProp
+   */
+  public function setPropInternal($value, $options = array())
+  {
+    if (!isset($options['num']))
+    {
+      throw new sfException('A "num" number option must be passed');
+    }
+
+    if ($this->prepare($value, $options))
+    {
+      $num = $options['num'];
+
+      $this->props[$num] = $value;
+    }
+  }
+
+  /**
+   * Used internally to fit in with the single value interface that
+   * allows us to use the prepare() function
+   *
+   * @see
+   */
+  public function seteVarInternal($value, $options = array())
+  {
+    if (!isset($options['num']))
+    {
+      throw new sfException('An "num" number option must be passed');
+    }
+
+    if ($this->prepare($value, $options))
+    {
+      $num = $options['num'];
+
+      $this->eVars[$num] = $value;
+    }
+  }
+
+  /**
+   * Saves the value to the session if use_flash is specified in the options array.
+   *
+   * @param   mixed $value
+   * @param   array $options
+   *
+   * @return  bool  whether to continue execution
+   */
+  protected function prepare(& $value, & $options = array())
+  {
+    if (isset($options['use_flash']) && $options['use_flash'])
+    {
+      unset($options['use_flash']);
+
+      $trace = debug_backtrace();
+
+      $caller = $trace[1];
+      $this->plant($caller['function'], array($value, $options));
+
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Plant a callable to be executed against the next request's tracker.
+   *
+   * This basically stores a callable on the session that will be called
+   * on the tracker on the next request. This is how you can "save" a portion
+   * of tracking information to be applied on the next request.
+   *
+   * @param   string $method
+   * @param   array $arguments
+   */
+  protected function plant($method, $arguments = array())
+  {
+    if (!$user = $this->getUser())
+    {
+      throw new LogicException('Cannot plant values without an injected user.');
+    }
+
+    $callables = $user->getAttributeHolder()->get('callables', array(), 'io_omniture_plugin');
+    $callables[] = array($method, $arguments);
+
+    $user->getAttributeHolder()->set('callables', $callables, 'io_omniture_plugin');
   }
 }
