@@ -21,7 +21,7 @@ class ioOmnitureTracker
    * @var sfUser
    */
   protected
-    $user                     = null,
+    $user                     = null;
   
   /**
    * A list of different parameters for the tracker
