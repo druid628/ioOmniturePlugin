@@ -301,28 +301,6 @@ class ioOmnitureTracker
   }
   
   /**
-   * Escape the provided value for Javascript evaluation.
-   * 
-   * @param   string $value
-   * 
-   * @return  string
-   */
-  protected function escape($value)
-  {
-    if (function_exists('json_encode'))
-    {
-      $escaped = json_encode($value);
-    }
-    else
-    {
-      sfLoader::loadHelpers(array('Escaping'));
-      $escaped = '"'.esc_js($value).'"';
-    }
-    
-    return $escaped;
-  }
-  
-  /**
    * @return sfUser
    */
   public function getUser()
@@ -346,16 +324,6 @@ class ioOmnitureTracker
   public function isEnabled()
   {
     return $this->enabled;
-  }
-  
-  /**
-   * Set the account to use for this tracker.
-   * 
-   * @param   string $account
-   */
-  public function setAccount($account)
-  {
-    $this->account = $account;
   }
   
   /**
