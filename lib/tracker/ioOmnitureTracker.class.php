@@ -65,30 +65,68 @@ class ioOmnitureTracker
     $props                    = array(),
     $eVars                    = array();
   
-  public function __construct(sfUser $user, $options = array())
+  public function __construct($account, $options = array())
   {
-    $this->user = $user;
-
+    $this->account = $account;
     $this->configure($options);
   }
-  
+
+  /**
+   * Apply non-null configuration values.
+   *
+   * @param   array $params
+   */
+  public function configure($params)
+  {
+    if (isset($params['enabled']))
+    {
+      $this->setEnabled($params['enabled']);
+    }
+
+    if (isset($params['page_name']))
+    {
+      $this->setPageName($params['page_name']);
+    }
+
+    if (isset($params['insertion']))
+    {
+      $this->setInsertion($params['insertion']);
+    }
+
+    if (isset($params['include_javascript']))
+    {
+      $this->setIncludeJavascript($params['include_javascript']);
+    }
+  }
+
+  /**
+   * Optionally set the user, which allows messages to be "planted" across
+   * requests.
+   *
+   * @param sfUser $user
+   */
+  public function setUser(sfUser $user)
+  {
+    $this->user = $user;
+  }
+
   /**
    * Extract options used by tracker's helper functions.
-   * 
+   *
    * View options include:
-   * 
+   *
    *  * track_as
    *  * is_event
    *  * use_linker
-   * 
+   *
    * @param   array $options
-   * 
+   *
    * @return  array
    */
   public function extractViewOptions(& $options)
   {
     $viewOptions = array();
-    
+
     foreach (array('track_as', 'is_event', 'use_linker') as $option)
     {
       if (isset($options[$option]))
@@ -97,7 +135,7 @@ class ioOmnitureTracker
         unset($options[$option]);
       }
     }
-    
+
     return $viewOptions;
   }
   
@@ -311,48 +349,6 @@ class ioOmnitureTracker
     }
     
     return $escaped;
-  }
-  
-  /**
-   * Apply non-null configuration values.
-   * 
-   * @param   array $params
-   */
-  public function configure($params)
-  {
-    $params = array_merge(array(
-      'enabled'                     => null,
-      'insertion'                   => null,
-      'account'                     => null,
-      'page_name'                   => null,
-      'domain_name'                 => null,
-      'detect_flash_policy'         => null,
-      'include_javascript'          => null), $params);
-    
-    if (!is_null($params['enabled']))
-    {
-      $this->setEnabled($params['enabled']);
-    }
-    
-    if (!is_null($params['account']))
-    {
-      $this->setAccount($params['account']);
-    }
-    
-    if (!is_null($params['page_name']))
-    {
-      $this->setPageName($params['page_name']);
-    }
-    
-    if (!is_null($params['insertion']))
-    {
-      $this->setInsertion($params['insertion']);
-    }
-    
-    if (!is_null($params['include_javascript']))
-    {
-      $this->setIncludeJavascript($params['include_javascript']);
-    }
   }
   
   /**
