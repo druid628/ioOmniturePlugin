@@ -22,6 +22,11 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
   protected $_context;
 
   /**
+   * @var ioOmnitureService
+   */
+  protected $service;
+
+  /**
    * We listen to a variety of events here
    */
   public function initialize()
@@ -142,31 +147,26 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
   }
 
   /**
-   * Returns whether or not the current response is basically "trackable".
-   *
-   * @return bool
+   * @return ioOmnitureService
    */
-  public function responseIsTrackable()
+  public function getOmnitureService()
   {
-    if (!$this->_context)
+    if ($this->service === null)
     {
-      throw new sfException('ioOmniturePluginConfiguration::responseIsTrackable() cannot be called this early.');
+      if ($this->_context === null)
+      {
+        throw new sfException('Cannot create the omniture service before the factories have been loaded');
+      }
+
+      $class = sfConfig::get('app_io_omniture_plugin_service_class', 'ioOmnitureService');
+      $this->service = new $class(
+        $this->dispatcher,
+        $this->_context->getRequest(),
+        $this->_context->getResponse(),
+        $this->_context->getController()
+      );
     }
 
-    $request    = $this->_context->getRequest();
-    $response   = $this->_context->getResponse();
-    $controller = $this->_context->getController();
-
-    if ($request->isXmlHttpRequest() ||
-        strpos($response->getContentType(), 'html') === false ||
-        $response->getStatusCode() == 304 ||
-        in_array($response->getStatusCode(), array(302, 301)) ||
-        $controller->getRenderMode() != sfView::RENDER_CLIENT ||
-        $response->isHeaderOnly())
-    {
-      return false;
-    }
-
-    return true;
+    return $this->service;
   }
 }
