@@ -109,35 +109,6 @@ class ioOmnitureTracker
   {
     $this->user = $user;
   }
-
-  /**
-   * Extract options used by tracker's helper functions.
-   *
-   * View options include:
-   *
-   *  * track_as
-   *  * is_event
-   *  * use_linker
-   *
-   * @param   array $options
-   *
-   * @return  array
-   */
-  public function extractViewOptions(& $options)
-  {
-    $viewOptions = array();
-
-    foreach (array('track_as', 'is_event', 'use_linker') as $option)
-    {
-      if (isset($options[$option]))
-      {
-        $viewOptions[$option] = $options[$option];
-        unset($options[$option]);
-      }
-    }
-
-    return $viewOptions;
-  }
   
   /**
    * Insert tracking code into a response.
