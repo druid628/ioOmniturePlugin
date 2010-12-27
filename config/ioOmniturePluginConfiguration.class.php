@@ -32,26 +32,34 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
   public function initialize()
   {
     $listener = array($this, 'observe');
-    
+
+    // add ->getOmnitureTracker() to several core factories
     $this->dispatcher->connect('request.method_not_found', $listener);
     $this->dispatcher->connect('response.method_not_found', $listener);
     $this->dispatcher->connect('component.method_not_found', $listener);
     $this->dispatcher->connect('user.method_not_found', $listener);
-    
+
+    // core events needed to make the plugin work
     $this->dispatcher->connect('response.filter_content', array($this, 'listenToResponseFilterContent'));
     $this->dispatcher->connect('context.load_factories', array($this, 'listenToContextLoadFactories'));
   }
 
   /**
-   * Returns the ioOmnitureTracker, which houses the core API for manipulating the Omniture tracking code.
+   * Returns the ioOmnitureTracker, which houses the core API for manipulating
+   * the Omniture tracking code.
    *
-   * @return ioEditableContentService
+   * @return ioOmnitureTracker
    */
   public function getOmnitureTracker()
   {
     if ($this->_ioOmnitureTracker === null)
     {
-      throw new sfException('Omniture tracker is not yet available');
+      if (!$this->_context)
+      {
+        throw new sfException('The omniture tracker cannot be created before the factories are loaded');
+      }
+
+      $this->_ioOmnitureTracker = $this->createOmnitureTracker($this->_context->getUser());
     }
 
     return $this->_ioOmnitureTracker;
@@ -92,6 +100,8 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
 
   /**
    * Creates and returns a new instance of the omniture tracker.
+   *
+   * This reads callables from the session and applies them to the tracker.
    *
    * @return ioOmnitureTracker
    */
