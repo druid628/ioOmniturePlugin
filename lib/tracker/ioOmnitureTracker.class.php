@@ -106,62 +106,59 @@ class ioOmnitureTracker
   
   /**
    * Insert tracking code into a response.
-   * 
-   * @param   sfResponse $response
    */
-  public function insert(sfResponse $response, $content = null)
+  public function insert($content)
   {
-    if (!$content) 
-    {
-      $content = $response->getContent();
-    }
-    
-    $html = array();
-    $html[] = '<!-- SiteCatalyst code version: H.20.3';
-    $html[] = 'Copyright 1997-2009 Omniture, Inc. More info available at';
-    $html[] = 'http://www.omniture.com -->';
-    $html[] = '<script type="text/javascript">';
-    $html[] = sprintf('  var s_account="%s";', $this->getAccount());
-    $html[] = '</script>';
+    $code = array();
+    $code[] = '<!-- SiteCatalyst code version: H.20.3';
+    $code[] = 'Copyright 1997-2009 Omniture, Inc. More info available at';
+    $code[] = 'http://www.omniture.com -->';
+    $code[] = '<script type="text/javascript">';
+    $code[] = sprintf('  var s_account="%s";', $this->getAccount());
+    $code[] = '</script>';
     
     if ($this->getIncludeJavascript())
     {
       // sometimes the helpers aren't loaded
       sfApplicationConfiguration::getActive()->loadHelpers(array('Asset', 'Tag'));
       
-      $html[] = javascript_include_tag($this->getSCodePath());
+      $code[] = javascript_include_tag($this->getSCodePath());
     }
-    $html[] = '<script type="text/javascript"><!--';
+    $code[] = '<script type="text/javascript"><!--';
     
     // custom variable setting code
+    throw new Exception('This must be re-implemented');
+    /*
     if ($response->getStatusCode() == '404')
     {
       $html[] = 's.pageType="errorPage";';
     }
+     *
+     */
 
     if ($this->getPageName())
     {
-      $html[] = sprintf('s.pageName="%s"', $this->getPageName());
+      $code[] = sprintf('s.pageName="%s"', $this->getPageName());
     }
     
     if ($this->getReferrer())
     {
-      $html[] = sprintf('s.referrer="%s"', $this->getReferrer());
+      $code[] = sprintf('s.referrer="%s"', $this->getReferrer());
     }
     
     if ($this->getTransactionId())
     {
-      $html[] = sprintf('s.transactionID="%s"', $this->getTransactionId());
+      $code[] = sprintf('s.transactionID="%s"', $this->getTransactionId());
     }
 
     if ($this->getState())
     {
-      $html[] = sprintf('s.state="%s"', $this->getState());
+      $code[] = sprintf('s.state="%s"', $this->getState());
     }
 
     if ($this->getZip())
     {
-      $html[] = sprintf('s.zip="%s"', $this->getZip());
+      $code[] = sprintf('s.zip="%s"', $this->getZip());
     }
     
     // build an array of activated events as the events_list
@@ -175,26 +172,27 @@ class ioOmnitureTracker
     }
     
     // add the events that are activated to the output html
-    $html[] = sprintf('s.events="%s"', implode(',', $events_list));
+    $code[] = sprintf('s.events="%s"', implode(',', $events_list));
     
     // add the s.prop# values
     foreach($this->props as $propNumber => $propValue)
     {
-      $html[] = sprintf('s.prop%s="%s"', $propNumber, $propValue);
+      $code[] = sprintf('s.prop%s="%s"', $propNumber, $propValue);
     }
     
     // add the s.eVar# values
     foreach($this->eVars as $eVarNumber => $eVarValue)
     {
-      $html[] = sprintf('s.eVar%s="%s"', $eVarNumber, $eVarValue);
+      $code[] = sprintf('s.eVar%s="%s"', $eVarNumber, $eVarValue);
     }
     
-    $html[] = '/************* DO NOT ALTER ANYTHING BELOW THIS LINE ! **************/';
-    $html[] = 'var s_code=s.t();if(s_code)document.write(s_code)//--></script>';
-    $html[] = '<!-- End SiteCatalyst code version: H.20.3 -->';
+    $code[] = '/************* DO NOT ALTER ANYTHING BELOW THIS LINE ! **************/';
+    $code[] = 'var s_code=s.t();if(s_code)document.write(s_code)//--></script>';
+    $code[] = '<!-- End SiteCatalyst code version: H.20.3 -->';
     
-    $html = join("\n", $html);
-    $this->doInsert($response, $content, $html, $this->insertion);
+    $code = join("\n", $code);
+
+    return $this->doInsert($content, $code, $this->insertion);
   }
   
   /**
@@ -207,13 +205,13 @@ class ioOmnitureTracker
   }
   
   /**
-   * Insert content into a response.
+   * Insert tracking html into the source html and returns it
    * 
-   * @param   sfResponse $response
-   * @param   string $content
-   * @param   string $position
+   * @param   string $html The source html content to insert into
+   * @param   string $code The tracking code to insert
+   * @param   string $position Where to insert the code
    */
-  protected function doInsert(sfResponse $response, $content, $html, $position = null)
+  protected function doInsert($html, $code, $position = null)
   {
     if ($position == null)
     {
@@ -222,31 +220,32 @@ class ioOmnitureTracker
     
     // check for overload
     $method = 'doInsert'.$position;
-    
     if (method_exists($this, $method))
     {
-      call_user_func(array($this, $method), $response, $content);
+      return call_user_func(array($this, $method), $html, $code);
     }
-    else
+
+    switch ($position)
     {
-      switch ($position)
-      {
-        case self::POSITION_TOP:
-        $new = preg_replace('/<body[^>]*>/i', "$0\n".$html."\n", $content, 1);
+      case self::POSITION_TOP:
+        $new = preg_replace('/<body[^>]*>/i', "$0\n".$code."\n", $html, 1);
         break;
-        
-        case self::POSITION_BOTTOM:
-        $new = str_ireplace('</body>', "\n".$html."\n</body>", $content);
+
+      case self::POSITION_BOTTOM:
+        $new = str_ireplace('</body>', "\n".$code."\n</body>", $html);
         break;
-      }
-      
-      if ($content == $new)
-      {
-        $new .= $html;
-      }
-      
-      $response->setContent($new);
+
+      default:
+        throw new InvalidArgumentException(sprintf('Cannot place omniture code with position "%s"', $position));
     }
+
+    // I guess if we couldn't insert, just throw it on the end...
+    if ($html == $new)
+    {
+      $new .= $code;
+    }
+
+    return $new;
   }
   
   /**
