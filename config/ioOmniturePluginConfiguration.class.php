@@ -123,27 +123,11 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
    */
   public function listenToResponseFilterContent(sfEvent $event, $content)
   {
-    $response = $event->getSubject();
-    $tracker  = $this->getOmnitureTracker();
-
-    // insert tracking code
-    if ($this->responseIsTrackable() && (true || $tracker->isEnabled()))
-    {
-      if (sfConfig::get('sf_logging_enabled'))
-      {
-        ioOmnitureToolkit::logMessage($this, 'Inserting tracking code.');
-      }
-      
-      $tracker->insert($response, $content);
-      
-      return $response->getContent();
-    }
-    elseif (sfConfig::get('sf_logging_enabled'))
-    {
-      ioOmnitureToolkit::logMessage($this, 'Tracking code not inserted.');
-    }
-
-    return $content;
+    return $this->getOmnitureService()->applyTrackerToResponse(
+      $event->getSubject(),
+      $content,
+      $this->getOmnitureTracker()
+    );
   }
 
   /**
@@ -162,8 +146,8 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
       $this->service = new $class(
         $this->dispatcher,
         $this->_context->getRequest(),
-        $this->_context->getResponse(),
-        $this->_context->getController()
+        $this->_context->getController(),
+        sfConfig::get('sf_logging_enabled')
       );
     }
 
