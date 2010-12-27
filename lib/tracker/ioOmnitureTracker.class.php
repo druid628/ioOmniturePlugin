@@ -31,9 +31,9 @@ class ioOmnitureTracker
    * @var array
    */
   protected $options = array(
-    'enabled'           => false,                   // whether the tracker is enabled or not
-    'insertion'         => self::POSITION_BOTTOM,   // where to insert the code
-    'includeJavascript' => true,                    // whether to include the actual s_code.js file
+    'enabled'             => false,                   // whether the tracker is enabled or not
+    'insertion'           => self::POSITION_BOTTOM,   // where to insert the code
+    'include_javascript'  => true,                    // whether to include the actual s_code.js file
   );
   
 
@@ -100,7 +100,7 @@ class ioOmnitureTracker
     $code[] = sprintf('  var s_account="%s";', $this->getAccount());
     $code[] = '</script>';
     
-    if ($this->getIncludeJavascript())
+    if ($this->getOption('include_javascript', true))
     {
       // sometimes the helpers aren't loaded
       sfApplicationConfiguration::getActive()->loadHelpers(array('Asset', 'Tag'));
@@ -294,7 +294,7 @@ class ioOmnitureTracker
    */
   public function setEnabled($enabled)
   {
-    $this->enabled = (bool) $enabled;
+    $this->setOption('enabled', $enabled);
   }
   
   /**
@@ -302,7 +302,7 @@ class ioOmnitureTracker
    */
   public function isEnabled()
   {
-    return $this->enabled;
+    return $this->getOption('enabled', false);
   }
   
   /**
@@ -313,50 +313,6 @@ class ioOmnitureTracker
   public function getAccount()
   {
     return $this->account;
-  }
-  
-  /**
-   * Set whether or not to include javascript
-   * 
-   * @param   string $account
-   */
-  public function setIncludeJavascript($includeJavascript)
-  {
-    $this->includeJavascript = $includeJavascript;
-  }
-  
-  /**
-   * Returns whether or not to include javascript
-   * 
-   * @return string
-   */
-  public function getIncludeJavascript()
-  {
-    return $this->includeJavascript;
-  }
-  
-  /**
-   * Set where the tracking code should be inserted into the response.
-   * 
-   * @param   string $insertion
-   * @param   array $options
-   */
-  public function setInsertion($insertion, $options = array())
-  {
-    if ($this->prepare($insertion, $options))
-    {
-      $this->insertion = $insertion;
-    }
-  }
-  
-  /**
-   * Returns the insertion location (bottom or top)
-   * 
-   * @return string
-   */
-  public function getInsertion()
-  {
-    return $this->insertion;
   }
   
   /**
