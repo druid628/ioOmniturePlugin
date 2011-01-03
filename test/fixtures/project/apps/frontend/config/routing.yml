@@ -1,0 +1,7 @@
+test_action:
+  url:  /test/action
+  params: { module: test, action: fromAction }
+
+test_view:
+  url:  /test/view
+  params: { module: test, action: fromView }

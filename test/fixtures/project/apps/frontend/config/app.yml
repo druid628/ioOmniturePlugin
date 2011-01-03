@@ -1,0 +1,12 @@
+all:
+  inline_object:
+    parser_class:  sfInlineObjectTestParser    # Class used by default for the parser
+  
+    types:
+      photo:
+        class:      InlineObjectPhoto
+      product:
+        class:      InlineObjectProduct
+        model:      Product
+        key_column: slug
+        

@@ -376,9 +376,12 @@ class ioOmnitureTracker
     return $this->transactionId;
   }
 
-  public function setZip($zip)
+  public function setZip($zip, $options = array())
   {
-    $this->zip = $zip;
+    if ($this->prepare($zip, $options))
+    {
+      $this->zip = $zip;
+    }
   }
 
   public function getZip()
@@ -386,9 +389,12 @@ class ioOmnitureTracker
     return $this->zip;
   }
 
-  public function setState($state)
+  public function setState($state, $options = array())
   {
-    $this->state = $state;
+    if ($this->prepare($state, $options))
+    {
+      $this->state = $state;
+    }
   }
 
   public function getState()
@@ -502,10 +508,10 @@ class ioOmnitureTracker
       throw new LogicException('Cannot plant values without an injected user.');
     }
 
-    $callables = $user->getAttributeHolder()->get('callables', array(), 'io_omniture_plugin');
+    $callables = $user->getAttribute('callables', array(), 'io_omniture_plugin');
     $callables[] = array($method, $arguments);
 
-    $user->getAttributeHolder()->set('callables', $callables, 'io_omniture_plugin');
+    $user->setAttribute('callables', $callables, 'io_omniture_plugin');
   }
 
   public function getPageType()
@@ -520,8 +526,11 @@ class ioOmnitureTracker
    * @param  string $pageType The "page type" (usually errorPage)
    * @return void
    */
-  public function setPageType($pageType)
+  public function setPageType($pageType, $options = array())
   {
-    $this->pageType = $pageType;
+    if ($this->prepare($pageType, $options))
+    {
+      $this->pageType = $pageType;
+    }
   }
 }
