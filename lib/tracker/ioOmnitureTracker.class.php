@@ -42,6 +42,7 @@ class ioOmnitureTracker
    */
   protected
     $pageName                 = null, // The name of the page, if other than the url
+    $pageType                 = null, // The "type" of the page, usually blank except errorPage for 404's
     $referrer                 = null, // The referrer if you need to set it manually
     $transactionId            = null, // The transactionID
     $zip                      = null, // The zip code of the current user
@@ -99,20 +100,16 @@ class ioOmnitureTracker
     $code[] = '<script type="text/javascript"><!--';
     
     // custom variable setting code
-    throw new Exception('This must be re-implemented');
-    /*
-    if ($response->getStatusCode() == '404')
-    {
-      $html[] = 's.pageType="errorPage";';
-    }
-     *
-     */
-
     if ($this->getPageName())
     {
       $code[] = sprintf('s.pageName="%s"', $this->getPageName());
     }
-    
+
+    if ($this->getPageType())
+    {
+      $code[] = sprintf('s.pageType="%s"', $this->getPageType());
+    }
+
     if ($this->getReferrer())
     {
       $code[] = sprintf('s.referrer="%s"', $this->getReferrer());
@@ -164,7 +161,7 @@ class ioOmnitureTracker
     
     $code = join("\n", $code);
 
-    return $this->doInsert($content, $code, $this->insertion);
+    return $this->doInsert($content, $code, $this->getOption('insertion'));
   }
   
   /**
@@ -509,5 +506,22 @@ class ioOmnitureTracker
     $callables[] = array($method, $arguments);
 
     $user->getAttributeHolder()->set('callables', $callables, 'io_omniture_plugin');
+  }
+
+  public function getPageType()
+  {
+    return $this->pageType;
+  }
+
+  /**
+   * The "type" of the page, which is usually only used when a page is
+   * a 404 error page (then it has value "errorPage").
+   *
+   * @param  string $pageType The "page type" (usually errorPage)
+   * @return void
+   */
+  public function setPageType($pageType)
+  {
+    $this->pageType = $pageType;
   }
 }

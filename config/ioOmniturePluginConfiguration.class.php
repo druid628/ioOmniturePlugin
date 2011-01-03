@@ -133,10 +133,18 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
    */
   public function listenToResponseFilterContent(sfEvent $event, $content)
   {
+    $response = $event->getSubject();
+    $tracker = $this->getOmnitureTracker();
+
+    if (sfConfig::get('app_io_omniture_plugin_handle_404') && $response->getStatusCode() == '404')
+    {
+      $tracker->setPageType('errorPage');
+    }
+
     return $this->getOmnitureService()->applyTrackerToResponse(
-      $event->getSubject(),
+      $response,
       $content,
-      $this->getOmnitureTracker()
+      $tracker
     );
   }
 
