@@ -88,14 +88,13 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
   }
   
   /**
-   * Binds the context to this
+   * Binds the context to this class.
    *
    * @param  sfEvent  $event
    */
   public function listenToContextLoadFactories(sfEvent $event)
   {
     $this->_context = $event->getSubject();
-    $this->_ioOmnitureTracker = $this->createOmnitureTracker($this->_context->getUser());
   }
 
   /**
