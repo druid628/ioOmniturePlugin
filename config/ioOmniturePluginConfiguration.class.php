@@ -94,7 +94,20 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
    */
   public function listenToContextLoadFactories(sfEvent $event)
   {
-    $this->_context = $event->getSubject();
+    $this->setContext($event->getSubject());
+  }
+
+  /**
+   * Sometimes you have the context, but this class's listener on context.load_factories
+   * has not yet been called yet. In that case, you can inject the context
+   * manually so that the tracker can be created
+   *
+   * @param sfContext $context
+   * @return void
+   */
+  public function setContext(sfContext $context)
+  {
+    $this->_context = $context;
   }
 
   /**
