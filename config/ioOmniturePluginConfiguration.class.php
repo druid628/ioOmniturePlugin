@@ -116,6 +116,7 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
 
     $config   = sfConfig::get('app_io_omniture_plugin_params', array());
     $tracker  = new $class($account, $config);
+    $tracker->setUser($user);
 
     // pull callables from session storage
     $callables = $user->getAttribute('callables', array(), 'io_omniture_plugin');
