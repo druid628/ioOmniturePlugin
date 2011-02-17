@@ -555,6 +555,13 @@ class ioOmnitureTracker
     $this->javascripts = $javascripts;
   }
 
+  /**
+   * Sets the dir for javascripts. 
+   * 
+   * @param mixed $dir 
+   * @access public
+   * @return void
+   */
   public function setJavascriptsDir($dir)
   {
     $this->javascriptsDir = $dir;

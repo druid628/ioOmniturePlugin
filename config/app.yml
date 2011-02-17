@@ -18,5 +18,3 @@ all:
       domain_name:          ~
       detect_flash_policy:  ~
       include_javascript:   true
-    
-
