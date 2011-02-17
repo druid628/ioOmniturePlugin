@@ -60,6 +60,8 @@ class ioOmniturePluginConfiguration extends sfPluginConfiguration
       }
 
       $this->_ioOmnitureTracker = $this->createOmnitureTracker($this->_context->getUser());
+      $this->_ioOmnitureTracker->setJavascripts(sfConfig::get('app_io_omniture_plugin_javascripts'));
+      $this->_ioOmnitureTracker->setJavascriptsDir('/js');
     }
 
     return $this->_ioOmnitureTracker;

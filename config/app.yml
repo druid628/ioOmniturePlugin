@@ -3,6 +3,7 @@ all:
     tracker_class:          ioOmnitureTracker
     service_class:          ioOmnitureService
     javascripts:            [] # javscripts to load when firing off an omniture event.
+    javascripts_dir:        '/js' # dir where javascripts are stored.
 
     # your unique account
     #account:                foo_bar

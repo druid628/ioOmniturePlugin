@@ -20,10 +20,13 @@ class ioOmnitureTracker
   /**
    * @var string The account name
    * @var sfUser
+   * @var array Javascripts to be loaded when an event fires.
    */
   protected
     $account                  = null,
-    $user                     = null;
+    $user                     = null,
+    $javascripts              = array(),
+    $javascriptsDir           = null;
   
   /**
    * The options array
@@ -95,12 +98,12 @@ class ioOmnitureTracker
       // sometimes the helpers aren't loaded
       sfApplicationConfiguration::getActive()->loadHelpers(array('Asset', 'Tag'));
       
-      foreach (sfConfig::get('app_io_omniture_plugin_javascripts') as $javascript)
+      foreach ($this->javascripts as $javascript)
       {
-        $code[] = javascript_include_tag($javascript);
+        $code[] = '<script type="text/javascript" src="' . $this->javascriptsDir . '/' . $javascript . '"></script>';
       }
 
-      $code[] = javascript_include_tag($this->getSCodePath());
+      $code[] = '<script type="text/javascript" src="' . $this->getSCodePath() . '"></script>';
     }
 
     $code[] = '<script type="text/javascript"><!--';
@@ -538,5 +541,22 @@ class ioOmnitureTracker
     {
       $this->pageType = $pageType;
     }
+  }
+
+  /**
+   * Sets javscripts to be loaded on-the-fly when an event fires off.
+   * 
+   * @param array $javascripts 
+   * @access public
+   * @return void
+   */
+  public function setJavascripts(array $javascripts)
+  {
+    $this->javascripts = $javascripts;
+  }
+
+  public function setJavascriptsDir($dir)
+  {
+    $this->javascriptsDir = $dir;
   }
 }
