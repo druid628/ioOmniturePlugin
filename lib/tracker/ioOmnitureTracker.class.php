@@ -95,8 +95,14 @@ class ioOmnitureTracker
       // sometimes the helpers aren't loaded
       sfApplicationConfiguration::getActive()->loadHelpers(array('Asset', 'Tag'));
       
+      foreach (sfConfig::get('app_io_omniture_plugin_javascripts') as $javascript)
+      {
+        $code[] = javascript_include_tag($javascript);
+      }
+
       $code[] = javascript_include_tag($this->getSCodePath());
     }
+
     $code[] = '<script type="text/javascript"><!--';
     
     // custom variable setting code
