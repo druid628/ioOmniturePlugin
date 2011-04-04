@@ -189,3 +189,9 @@ alternative Javascript method. Here is an example using jQuery:
         s.events=""
       });
     </script>
+
+More!
+-----
+
+This plugin can do a lot more, but this covers the basics. See the `ioOmnitureTracker`
+class for a good API of what's possible.
