@@ -2,19 +2,25 @@ all:
   io_omniture_plugin:
     tracker_class:          ioOmnitureTracker
     service_class:          ioOmnitureService
-    javascripts:            [] # javscripts to load when firing off an omniture event.
-    javascripts_dir:        '/js' # dir where javascripts are stored.
+    # extra javscripts to load when loading the omniture code
+    javascripts:            []
+    # dir where the above javascripts live
+    javascripts_dir:        '/js'
 
     # your unique account
     #account:                foo_bar
 
     # Whether or not to set the pageType to "errorPage" automatically on 404
     handle_404:             true
+
+    # tracker options
+    params:
+      enabled:              false
+      insertion:            bottom
+      include_javascript:   true
+
+# only enable the tracker in the prod environment
+prod:
+  io_omniture_plugin:
     params:
       enabled:              true
-      insertion:            bottom
-      account:              YOURACCOUNT
-      page_name:            ~
-      domain_name:          ~
-      detect_flash_policy:  ~
-      include_javascript:   true
