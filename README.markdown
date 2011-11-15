@@ -90,6 +90,17 @@ source:
 
     s.eVar9 = 1
 
+### Getting eVar variables
+
+Another common task for eVar is the getter. 
+This function was added mainly to aid in debugging and for the most part
+isn't really used anywhere else.
+
+// ...
+          $this->getOmnitureTracker()->geteVar(9);
+// ...
+
+
 ### Throwing events
 
 Finally, omniture events are a very powerful way to break data down by who
@@ -152,7 +163,7 @@ a redirect:
 
         // ...
 
-        $this->getOmnitureTracker()->setEvar(5, $foo, array('use_flash' => true));
+        $this->getOmnitureTracker()->seteVar(5, $foo, array('use_flash' => true));
         $this->getOmnitureTracker()->activateEvent(2, array('use_flash' => true));
 
         $this->redirect('form_thanks');

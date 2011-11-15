@@ -345,6 +345,28 @@ class ioOmnitureTracker
     
     $this->seteVarInternal($value, $options);
   }
+
+  /**
+   * Getter for eVars, if it has been set
+   * if not returns null
+   * 
+   * for the most part this function is not needed however it
+   * is very useful when debugging.
+   * 
+   * @author Micah Breedlove <micah.breedlove@iostudio.com>
+   * @param integer The prop number to set (e.g. 5 for s.eVar5)
+   * @return mixed|null could be string or int if set, could be null if not set
+   */
+  public function geteVar($num)
+  {
+      $value = null;
+      if(isset($this->eVars[$num]))
+      {   
+          $value = $this->eVars[$num];
+      }
+      return $value;
+  }
+
   
   /**
    * Sets the referrer variable if you need to actually output that
